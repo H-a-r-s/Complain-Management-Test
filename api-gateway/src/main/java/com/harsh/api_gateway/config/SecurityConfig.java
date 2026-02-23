@@ -21,6 +21,7 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 
@@ -43,18 +44,16 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
 
                 .authorizeExchange(ex -> ex
-                        // Public endpoints
+                        .pathMatchers(HttpMethod.OPTIONS).permitAll()
+
                         .pathMatchers("/auth/**").permitAll()
                         .pathMatchers("/actuator/**").permitAll()
 
-                        // Complaint public endpoints
                         .pathMatchers(HttpMethod.POST, "/complaints").permitAll()
                         .pathMatchers(HttpMethod.GET, "/complaints/track/**").permitAll()
 
-                        // Admin endpoints (Complaint-Service)
                         .pathMatchers("/admin/**").hasRole("ADMIN")
 
-                        // Everything else requires auth
                         .anyExchange().authenticated()
                 )
 

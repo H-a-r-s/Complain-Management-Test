@@ -2,6 +2,9 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: API-GATEWAY
+
   cloud:
     gateway:
       discovery:
@@ -20,7 +23,7 @@ spring:
         - id: complaint-service
           uri: lb://COMPLAINT-SERVICE
           predicates:
-            - Path=/complaints/**,/admin/complaints/**
+            - Path=/complaints/**,/admin/**
           filters:
             - StripPrefix=0
 
@@ -31,5 +34,11 @@ eureka:
   instance:
     prefer-ip-address: true
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 
-
+jwt:
+  secret: THIS_IS_DEMO_SECRET_CHANGE_IT_1234567890_ABCD
