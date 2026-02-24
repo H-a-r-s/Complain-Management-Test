@@ -6,6 +6,7 @@ import com.harsh.complaint_service.dto.UpdateStatusRequest;
 import com.harsh.complaint_service.entity.Complaint;
 import com.harsh.complaint_service.entity.ComplaintStatus;
 import com.harsh.complaint_service.entity.ComplaintUpdate;
+import com.harsh.complaint_service.exception.NotFoundException;
 import com.harsh.complaint_service.repository.ComplaintRepository;
 import com.harsh.complaint_service.repository.ComplaintUpdateRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class ComplaintService {
                 .ticketNo("PENDING")
                 .build();
 
-        c = complaintRepo.save(c); // get id
+        c = complaintRepo.save(c);
 
         String year = String.valueOf(LocalDate.now().getYear());
         String ticket = "CMP-" + year + "-" + String.format("%06d", c.getId());
@@ -48,14 +49,13 @@ public class ComplaintService {
 
     public ComplaintTrackResponse track(String ticketNo) {
         Complaint c = complaintRepo.findByTicketNo(ticketNo)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+                .orElseThrow(() -> new NotFoundException("Ticket not found"));
 
         List<ComplaintUpdate> updates = updateRepo.findByComplaintIdOrderByCreatedAtAsc(c.getId());
         return ComplaintTrackResponse.from(c, updates);
     }
 
     public Page<Complaint> adminList(String status, String q, Pageable pageable) {
-        // Keep it simple: filter by status only; search can be added later.
         if (status != null && !status.isBlank()) {
             return complaintRepo.findByStatus(ComplaintStatus.valueOf(status), pageable);
         }
@@ -65,7 +65,7 @@ public class ComplaintService {
     @Transactional
     public void adminUpdateStatus(Long complaintId, UpdateStatusRequest req, Long adminIdNullable) {
         Complaint c = complaintRepo.findById(complaintId)
-                .orElseThrow(() -> new RuntimeException("Complaint not found"));
+                .orElseThrow(() -> new NotFoundException("Complaint not found: " + complaintId));
 
         ComplaintStatus from = c.getStatus();
         ComplaintStatus to = ComplaintStatus.valueOf(req.getStatus());

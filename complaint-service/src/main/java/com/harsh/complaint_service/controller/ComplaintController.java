@@ -5,8 +5,10 @@ import com.harsh.complaint_service.dto.CreateComplaintResponse;
 import com.harsh.complaint_service.dto.UpdateStatusRequest;
 import com.harsh.complaint_service.entity.Complaint;
 import com.harsh.complaint_service.service.ComplaintService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 //@CrossOrigin(origins = "http://localhost:5173")
@@ -17,16 +19,15 @@ public class ComplaintController {
     private final ComplaintService service;
 
     @PostMapping("/complaints")
-    public CreateComplaintResponse create(@RequestBody CreateComplaintRequest req) {
-        return service.create(req);
+    public ResponseEntity<CreateComplaintResponse> create(@Valid @RequestBody CreateComplaintRequest req) {
+        return ResponseEntity.ok(service.create(req));
     }
 
     @GetMapping("/complaints/track/{ticketNo}")
-    public ComplaintTrackResponse track(@PathVariable String ticketNo) {
-        return service.track(ticketNo);
+    public ResponseEntity<ComplaintTrackResponse> track(@PathVariable String ticketNo) {
+        return ResponseEntity.ok(service.track(ticketNo));
     }
 
-    // Admin (no security yet; later add JWT role checks)
     @GetMapping("/admin/complaints")
     public Page<Complaint> adminList(
             @RequestParam(required = false) String status,
