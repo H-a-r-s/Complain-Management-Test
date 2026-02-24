@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: API-GATEWAY
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      routes:
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=0
+
+        - id: complaint-service
+          uri: lb://COMPLAINT-SERVICE
+          predicates:
+            - Path=/complaints/**,/admin/**
+          filters:
+            - StripPrefix=0
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
+
+jwt:
+  secret: THIS_IS_DEMO_SECRET_CHANGE_IT_1234567890
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: "*"
